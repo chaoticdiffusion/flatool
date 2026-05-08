@@ -5,7 +5,6 @@ from flatool_core import build_locked_pptx, build_output_name, build_pdf_batch_z
 
 APP_NAME = "Flatool"
 BRAND_NAME = "Curious Curriculum Club"
-APP_VERSION = "v1.2 - International Edition"
 
 
 st.set_page_config(page_title=f"{APP_NAME} | {BRAND_NAME}", page_icon="L", layout="centered")
@@ -82,6 +81,16 @@ st.markdown(
         color: #111111;
       }
 
+      [data-testid="stFormSubmitButton"] button p {
+        font-size: 0;
+      }
+
+      [data-testid="stFormSubmitButton"] button p::after {
+        content: "\\1F511";
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+
       [data-testid="InputInstructions"] {
         display: none;
       }
@@ -89,15 +98,6 @@ st.markdown(
       [data-testid="stForm"] {
         border: 0;
         padding: 0;
-      }
-
-      .flatool-footer {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        color: #9d988f;
-        font-size: 0.74rem;
-        margin-top: 2rem;
       }
 
       .flatool-section {
@@ -127,6 +127,18 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 2px;
       }
+
+      .flatool-app-note {
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+        color: #d8d0c6;
+        line-height: 1.7;
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+      }
+
+      .flatool-app-note strong {
+        color: #ffffff;
+      }
     </style>
     <div class="flatool-kicker">Flatool by Curious Curriculum Club</div>
     <h1 class="flatool-title">REST MORE, TEACH BETTER</h1>
@@ -144,7 +156,7 @@ with st.form("license_form", border=False):
             label_visibility="collapsed",
         )
     with submit_col:
-        apply_key = st.form_submit_button("Apply Key", type="primary", use_container_width=True)
+        apply_key = st.form_submit_button("Key", type="primary", use_container_width=True)
 
 license_ok = is_valid_license(license_key)
 
@@ -206,16 +218,6 @@ if license_ok and uploaded_files:
             st.error(f"Processing failed: {error}")
 
 st.markdown(
-    f"""
-      <div class="flatool-footer">
-        <span>{APP_VERSION}</span>
-        <span>Help & Feedback</span>
-      </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown(
     """
     <div class="flatool-section">
       <h2>How to use</h2>
@@ -267,3 +269,14 @@ with st.expander("What should I do if a large PDF is slow?"):
         "Because processing happens on your device, very large PDFs depend on your browser, "
         "RAM, and phone or laptop performance. Try processing fewer files at once."
     )
+
+st.markdown(
+    """
+    <div class="flatool-app-note">
+      <strong>Windows and Mac app are available.</strong><br>
+      More fast, more stable, more rest.<br>
+      Contact: rheachaoticmateria@gmail.com
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
