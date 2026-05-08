@@ -33,12 +33,6 @@ CCC-FOUNDER-2026
 
 The license gate is intentionally lightweight because this version is fully client-side. It is useful for normal buyer friction, but it is not strong DRM.
 
-## GitHub Pages
-
-Push this repo to GitHub, then enable Pages from the repository settings:
-
-```text
-Settings -> Pages -> Deploy from a branch -> main / root
 ```
 
 ## Core files
