@@ -88,9 +88,14 @@
         cover?.classList.add("is-hidden");
         setTimeout(() => cover?.remove(), 320);
       };
+      const appIsReady = () =>
+        document.querySelector('[data-testid="stTextInput"]') ||
+        document.querySelector('[data-testid="stFileUploader"]') ||
+        document.querySelector('[data-testid="stRadio"]');
+
       const observer = new MutationObserver(() => {
-        if (document.querySelector(".stApp")) {
-          setTimeout(revealApp, 300);
+        if (appIsReady()) {
+          setTimeout(revealApp, 700);
           observer.disconnect();
         }
       });
