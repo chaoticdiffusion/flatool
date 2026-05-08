@@ -28,6 +28,12 @@ def is_valid_license(license_key: str) -> bool:
     return hashlib.sha256(normalized.encode()).hexdigest() in VALID_LICENSE_HASHES
 
 
+def build_output_name(uploaded_files) -> str:
+    first_file = sorted(uploaded_files, key=lambda file: natural_sort_key(file.name))[0]
+    base_name = first_file.name.rsplit(".", 1)[0].strip() or "Logos"
+    return f"{base_name} RESULT.pptx"
+
+
 def background_xml(relationship_id: str) -> str:
     return f"""<p:bg xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><p:bgPr><a:blipFill><a:blip r:embed="{relationship_id}"><a:extLst><a:ext uri="{{28A0092B-C50C-407E-A947-70E740481C1C}}"><a14:useLocalDpi xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" val="0"/></a:ext></a:extLst></a:blip><a:stretch><a:fillRect/></a:stretch></a:blipFill></p:bgPr></p:bg>"""
 
@@ -93,4 +99,3 @@ def build_locked_pptx(uploaded_files) -> io.BytesIO:
     presentation.save(output)
     output.seek(0)
     return output
-

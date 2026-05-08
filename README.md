@@ -4,6 +4,8 @@ Browser-side Streamlit/stlite version of Logos for Curious Curriculum Club.
 
 Logos converts uploaded PNG, JPG, JPEG, and PDF files into a PowerPoint file where each page is flattened as a non-editable slide background. The static web build runs in the user's browser through stlite/Pyodide, so files are processed locally instead of uploaded to a server.
 
+The download name is generated automatically from the first naturally sorted upload, plus `RESULT`.
+
 ## Local preview
 
 ```powershell
