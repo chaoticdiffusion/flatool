@@ -40,7 +40,6 @@ st.markdown(
         font-weight: 900;
         line-height: 1;
         margin: 0;
-        text-align: center;
         text-transform: uppercase;
       }
 
@@ -50,7 +49,6 @@ st.markdown(
         font-style: italic;
         font-weight: 700;
         margin: 0.9rem 0 2.2rem;
-        text-align: center;
       }
 
       .stButton > button,
