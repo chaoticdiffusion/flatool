@@ -72,6 +72,16 @@ st.markdown(
         border: 0;
       }
 
+      [data-testid="stFormSubmitButton"] button {
+        background: #f5c542;
+        color: #111111;
+      }
+
+      [data-testid="stFormSubmitButton"] button:hover {
+        background: #ffd765;
+        color: #111111;
+      }
+
       [data-testid="InputInstructions"] {
         display: none;
       }
@@ -88,6 +98,34 @@ st.markdown(
         color: #9d988f;
         font-size: 0.74rem;
         margin-top: 2rem;
+      }
+
+      .flatool-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+        margin-top: 3rem;
+        padding-top: 2rem;
+      }
+
+      .flatool-section h2 {
+        color: #ffffff;
+        font-size: 1.75rem;
+        margin: 0 0 1rem;
+      }
+
+      .flatool-steps {
+        color: #e7e1d8;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+      }
+
+      .flatool-steps li {
+        margin-bottom: 0.5rem;
+      }
+
+      [data-testid="stExpander"] {
+        background: #181818;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 2px;
       }
     </style>
     <div class="flatool-kicker">Flatool by Curious Curriculum Club</div>
@@ -168,3 +206,56 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+st.markdown(
+    """
+    <div class="flatool-section">
+      <h2>How to use</h2>
+      <ol class="flatool-steps">
+        <li>Enter your Flatool license key, then click <strong>Apply Key</strong>.</li>
+        <li>Choose a mode: combine PNG/JPG files into one PPTX, or process PDFs in batch.</li>
+        <li>Upload your files. Flatool sorts filenames naturally, so 2 comes before 10.</li>
+        <li>Click <strong>Process files</strong>, then download the result.</li>
+      </ol>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown("## FAQ")
+
+with st.expander("Is my material kept private?", expanded=True):
+    st.write(
+        "Yes. Flatool runs in your browser with stlite/Pyodide. Your files are processed "
+        "on your own device and are not uploaded to a Flatool server."
+    )
+
+with st.expander("Which mode should I use?"):
+    st.write(
+        "Use Multi PNG/JPG to one PPTX when you want many image files combined into one "
+        "presentation. Use Batch PDF to multiple PPTX when each PDF should become its own "
+        "PowerPoint file."
+    )
+
+with st.expander("Why does the first load take a while?"):
+    st.write(
+        "The first visit downloads the browser Python runtime and processing packages. "
+        "After that, your browser may cache parts of it, so later visits can feel faster."
+    )
+
+with st.expander("Will the flattened file look different from the original?"):
+    st.write(
+        "Flatool turns each image or PDF page into a slide background. The result is meant "
+        "to preserve the visual layout while making the slide content non-editable."
+    )
+
+with st.expander("What file formats are supported?"):
+    st.write(
+        "The image mode supports PNG, JPG, and JPEG. The batch mode supports PDF files."
+    )
+
+with st.expander("What should I do if a large PDF is slow?"):
+    st.write(
+        "Because processing happens on your device, very large PDFs depend on your browser, "
+        "RAM, and phone or laptop performance. Try processing fewer files at once."
+    )
