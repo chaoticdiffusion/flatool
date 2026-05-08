@@ -138,9 +138,12 @@ st.markdown(
 with st.form("license_form", border=False):
     key_col, submit_col = st.columns([3, 1])
     with key_col:
-        license_key = st.text_input("License Key", placeholder="Enter your Flatool key")
+        license_key = st.text_input(
+            "License Key",
+            placeholder="Enter your Flatool key",
+            label_visibility="collapsed",
+        )
     with submit_col:
-        st.markdown("<div style='height: 1.75rem'></div>", unsafe_allow_html=True)
         apply_key = st.form_submit_button("Apply Key", type="primary", use_container_width=True)
 
 license_ok = is_valid_license(license_key)
@@ -152,13 +155,18 @@ elif apply_key and license_key:
 
 mode = st.radio(
     "Mode",
-    ["Multi PNG/JPG to one PPTX", "Batch PDF to multiple PPTX"],
+    ["Multi PNG/JPG/PDF to one PPTX", "Batch PDF to multiple PPTX"],
     disabled=not license_ok,
 )
 
 is_pdf_batch = mode == "Batch PDF to multiple PPTX"
-allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg"]
-upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG files"
+allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg", "pdf"]
+upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG/PDF files"
+
+if license_ok and not is_pdf_batch:
+    st.caption("This mode combines every uploaded image or PDF page into one PPTX file.")
+elif license_ok:
+    st.caption("This mode creates one PPTX for each uploaded PDF, then downloads them together as a ZIP.")
 
 uploaded_files = st.file_uploader(
     upload_label,
@@ -213,7 +221,7 @@ st.markdown(
       <h2>How to use</h2>
       <ol class="flatool-steps">
         <li>Enter your Flatool license key, then click <strong>Apply Key</strong>.</li>
-        <li>Choose a mode: combine PNG/JPG files into one PPTX, or process PDFs in batch.</li>
+        <li>Choose a mode: combine PNG/JPG/PDF files into one PPTX, or process PDFs in batch.</li>
         <li>Upload your files. Flatool sorts filenames naturally, so 2 comes before 10.</li>
         <li>Click <strong>Process files</strong>, then download the result.</li>
       </ol>
@@ -226,21 +234,21 @@ st.markdown("## FAQ")
 
 with st.expander("Is my material kept private?", expanded=True):
     st.write(
-        "Yes. Flatool runs in your browser with stlite/Pyodide. Your files are processed "
-        "on your own device and are not uploaded to a Flatool server."
+        "Yes. Your files are processed on your own device and are not uploaded to a "
+        "Flatool server."
     )
 
 with st.expander("Which mode should I use?"):
     st.write(
-        "Use Multi PNG/JPG to one PPTX when you want many image files combined into one "
-        "presentation. Use Batch PDF to multiple PPTX when each PDF should become its own "
-        "PowerPoint file."
+        "Use Multi PNG/JPG/PDF to one PPTX when you want everything combined into one "
+        "PowerPoint file. Use Batch PDF to multiple PPTX when each PDF should become "
+        "its own PowerPoint file."
     )
 
 with st.expander("Why does the first load take a while?"):
     st.write(
-        "The first visit downloads the browser Python runtime and processing packages. "
-        "After that, your browser may cache parts of it, so later visits can feel faster."
+        "The first visit prepares the tool in your browser. After that, your browser may "
+        "remember parts of it, so later visits can feel faster."
     )
 
 with st.expander("Will the flattened file look different from the original?"):
@@ -251,7 +259,7 @@ with st.expander("Will the flattened file look different from the original?"):
 
 with st.expander("What file formats are supported?"):
     st.write(
-        "The image mode supports PNG, JPG, and JPEG. The batch mode supports PDF files."
+        "The one-file mode supports PNG, JPG, JPEG, and PDF. The batch mode supports PDF files."
     )
 
 with st.expander("What should I do if a large PDF is slow?"):
