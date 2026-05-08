@@ -34,19 +34,13 @@ st.markdown(
         display: none;
       }
 
-      .flatool-kicker {
-        color: #b9b4aa;
-        font-size: 0.76rem;
-        letter-spacing: 0;
-        margin-bottom: 0.75rem;
-      }
-
       .flatool-title {
         color: #ffffff;
         font-size: clamp(2.1rem, 5vw, 3.7rem);
         font-weight: 900;
         line-height: 1;
         margin: 0;
+        text-align: center;
         text-transform: uppercase;
       }
 
@@ -56,6 +50,7 @@ st.markdown(
         font-style: italic;
         font-weight: 700;
         margin: 0.9rem 0 2.2rem;
+        text-align: center;
       }
 
       .stButton > button,
@@ -151,7 +146,6 @@ st.markdown(
         color: #ffffff;
       }
     </style>
-    <div class="flatool-kicker">Flatool by Curious Curriculum Club</div>
     <h1 class="flatool-title">REST MORE, TEACH BETTER</h1>
     <div class="flatool-tagline">you're not lazy, just efficiency</div>
     """,
