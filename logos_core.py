@@ -1,6 +1,7 @@
 import hashlib
 import io
 import re
+import zipfile
 from typing import Iterable
 
 import fitz
@@ -30,8 +31,12 @@ def is_valid_license(license_key: str) -> bool:
 
 def build_output_name(uploaded_files) -> str:
     first_file = sorted(uploaded_files, key=lambda file: natural_sort_key(file.name))[0]
-    base_name = first_file.name.rsplit(".", 1)[0].strip() or "Logos"
-    return f"{base_name} RESULT.pptx"
+    return build_result_name(first_file.name, ".pptx")
+
+
+def build_result_name(file_name: str, extension: str) -> str:
+    base_name = file_name.rsplit(".", 1)[0].strip() or "Logos"
+    return f"{base_name} RESULT{extension}"
 
 
 def background_xml(relationship_id: str) -> str:
@@ -97,5 +102,17 @@ def build_locked_pptx(uploaded_files) -> io.BytesIO:
 
     output = io.BytesIO()
     presentation.save(output)
+    output.seek(0)
+    return output
+
+
+def build_pdf_batch_zip(uploaded_files) -> io.BytesIO:
+    output = io.BytesIO()
+
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+        for uploaded_file in sorted(uploaded_files, key=lambda file: natural_sort_key(file.name)):
+            pptx_bytes = build_locked_pptx([uploaded_file])
+            archive.writestr(build_result_name(uploaded_file.name, ".pptx"), pptx_bytes.getvalue())
+
     output.seek(0)
     return output
