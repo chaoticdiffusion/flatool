@@ -17,16 +17,49 @@
         background: #111111;
       }
 
-      #root {
-        visibility: hidden;
+      #flatool-boot-cover {
+        align-items: center;
+        background: #111111;
+        color: #f7f2e8;
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        position: fixed;
+        z-index: 2147483647;
       }
 
-      body.flatool-ready #root {
-        visibility: visible;
+      #flatool-boot-cover.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 240ms ease;
+      }
+
+      .boot-mark {
+        color: #ffffff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: clamp(2rem, 5vw, 3.6rem);
+        font-weight: 900;
+        letter-spacing: 0;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .boot-submark {
+        color: #b9b4aa;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-top: 0.9rem;
       }
     </style>
   </head>
   <body>
+    <div id="flatool-boot-cover">
+      <div>
+        <div class="boot-mark">Flatool</div>
+        <div class="boot-submark">Curious Curriculum Club</div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module">
       import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.7.2/build/stlite.js";
@@ -50,10 +83,14 @@
         document.getElementById("root"),
       );
 
-      const revealApp = () => document.body.classList.add("flatool-ready");
+      const revealApp = () => {
+        const cover = document.getElementById("flatool-boot-cover");
+        cover?.classList.add("is-hidden");
+        setTimeout(() => cover?.remove(), 320);
+      };
       const observer = new MutationObserver(() => {
         if (document.querySelector(".stApp")) {
-          revealApp();
+          setTimeout(revealApp, 300);
           observer.disconnect();
         }
       });
@@ -63,7 +100,7 @@
         subtree: true,
       });
 
-      setTimeout(revealApp, 12000);
+      setTimeout(revealApp, 20000);
     </script>
   </body>
 </html>
