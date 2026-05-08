@@ -29,6 +29,11 @@ st.markdown(
         display: none;
       }
 
+      .stHeading a,
+      [data-testid="stHeadingWithActionElements"] a {
+        display: none;
+      }
+
       .flatool-kicker {
         color: #b9b4aa;
         font-size: 0.76rem;
@@ -72,13 +77,15 @@ st.markdown(
       }
 
       [data-testid="stFormSubmitButton"] button {
-        background: #f5c542;
-        color: #111111;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        color: #ffffff;
       }
 
       [data-testid="stFormSubmitButton"] button:hover {
-        background: #ffd765;
-        color: #111111;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        color: #ffffff;
       }
 
       [data-testid="stFormSubmitButton"] button p {
@@ -130,10 +137,14 @@ st.markdown(
 
       .flatool-app-note {
         border-top: 1px solid rgba(255, 255, 255, 0.18);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem 1.3rem;
+        justify-content: space-between;
         color: #d8d0c6;
-        line-height: 1.7;
         margin-top: 2.5rem;
-        padding-top: 1.5rem;
+        padding-top: 1rem;
+        font-size: 0.86rem;
       }
 
       .flatool-app-note strong {
@@ -273,9 +284,9 @@ with st.expander("What should I do if a large PDF is slow?"):
 st.markdown(
     """
     <div class="flatool-app-note">
-      <strong>Windows and Mac app are available.</strong><br>
-      More fast, more stable, more rest.<br>
-      Contact: rheachaoticmateria@gmail.com
+      <span><strong>Windows and Mac app are available.</strong></span>
+      <span>More fast, more stable, more rest.</span>
+      <span>Contact: rheachaoticmateria@gmail.com</span>
     </div>
     """,
     unsafe_allow_html=True,
