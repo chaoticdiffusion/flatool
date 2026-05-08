@@ -1,9 +1,9 @@
 import streamlit as st
 
-from logos_core import build_locked_pptx, build_output_name, build_pdf_batch_zip, is_valid_license
+from flatool_core import build_locked_pptx, build_output_name, build_pdf_batch_zip, is_valid_license
 
 
-APP_NAME = "Logos"
+APP_NAME = "Flatool"
 BRAND_NAME = "Curious Curriculum Club"
 APP_VERSION = "v1.2 - International Edition"
 
@@ -30,14 +30,14 @@ st.markdown(
         display: none;
       }
 
-      .logos-kicker {
+      .flatool-kicker {
         color: #b9b4aa;
         font-size: 0.76rem;
         letter-spacing: 0;
         margin-bottom: 0.75rem;
       }
 
-      .logos-title {
+      .flatool-title {
         color: #ffffff;
         font-size: clamp(2.1rem, 5vw, 3.7rem);
         font-weight: 900;
@@ -46,7 +46,7 @@ st.markdown(
         text-transform: uppercase;
       }
 
-      .logos-tagline {
+      .flatool-tagline {
         color: #f2eadf;
         font-size: 1rem;
         font-style: italic;
@@ -72,7 +72,7 @@ st.markdown(
         border: 0;
       }
 
-      .logos-footer {
+      .flatool-footer {
         display: flex;
         justify-content: space-between;
         gap: 1rem;
@@ -81,14 +81,14 @@ st.markdown(
         margin-top: 2rem;
       }
     </style>
-    <div class="logos-kicker">LOGOS INTERNATIONAL EDITION</div>
-    <h1 class="logos-title">REST MORE, TEACH BETTER</h1>
-    <div class="logos-tagline">you're not lazy, just efficiency</div>
+    <div class="flatool-kicker">Flatool by Curious Curriculum Club</div>
+    <h1 class="flatool-title">REST MORE, TEACH BETTER</h1>
+    <div class="flatool-tagline">you're not lazy, just efficiency</div>
     """,
     unsafe_allow_html=True,
 )
 
-license_key = st.text_input("License Key", type="password", placeholder="Enter your Logos key")
+license_key = st.text_input("License Key", type="password", placeholder="Enter your Flatool key")
 license_ok = is_valid_license(license_key)
 
 if license_key and license_ok:
@@ -117,7 +117,7 @@ if not license_ok:
     st.info("Enter a valid license key to unlock processing.")
 
 if license_ok and uploaded_files:
-    output_name = "Logos PDF Batch RESULT.zip" if is_pdf_batch else build_output_name(uploaded_files)
+    output_name = "Flatool PDF Batch RESULT.zip" if is_pdf_batch else build_output_name(uploaded_files)
     st.caption(f"Output: {output_name}")
 
     if st.button("Process files", type="primary"):
@@ -145,7 +145,7 @@ if license_ok and uploaded_files:
 
 st.markdown(
     f"""
-      <div class="logos-footer">
+      <div class="flatool-footer">
         <span>{APP_VERSION}</span>
         <span>Help & Feedback</span>
       </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Logos | Curious Curriculum Club</title>
+    <title>Flatool | Curious Curriculum Club</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.7.2/build/stlite.css" />
     <style>
       html,
@@ -14,7 +14,15 @@
       }
 
       body {
-        background: #f7f3ec;
+        background: #111111;
+      }
+
+      #root {
+        visibility: hidden;
+      }
+
+      body.flatool-ready #root {
+        visibility: visible;
       }
     </style>
   </head>
@@ -30,8 +38,8 @@
             "app.py": {
               url: "./app.py",
             },
-            "logos_core.py": {
-              url: "./logos_core.py",
+            "flatool_core.py": {
+              url: "./flatool_core.py",
             },
           },
           requirements: ["python-pptx", "PyMuPDF"],
@@ -41,6 +49,21 @@
         },
         document.getElementById("root"),
       );
+
+      const revealApp = () => document.body.classList.add("flatool-ready");
+      const observer = new MutationObserver(() => {
+        if (document.querySelector(".stApp")) {
+          revealApp();
+          observer.disconnect();
+        }
+      });
+
+      observer.observe(document.getElementById("root"), {
+        childList: true,
+        subtree: true,
+      });
+
+      setTimeout(revealApp, 12000);
     </script>
   </body>
 </html>

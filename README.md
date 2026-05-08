@@ -1,8 +1,8 @@
-# Logos
+# Flatool
 
-Browser-side Streamlit/stlite version of Logos for Curious Curriculum Club.
+Browser-side Streamlit/stlite version of Flatool for Curious Curriculum Club.
 
-Logos converts uploaded PNG/JPG files or PDF files into PowerPoint files where each page is flattened as a non-editable slide background. The static web build runs in the user's browser through stlite/Pyodide, so files are processed locally instead of uploaded to a server.
+Flatool converts uploaded PNG/JPG files or PDF files into PowerPoint files where each page is flattened as a non-editable slide background. The static web build runs in the user's browser through stlite/Pyodide, so files are processed locally instead of uploaded to a server.
 
 The download name is generated automatically from the first naturally sorted upload, plus `RESULT`.
 
@@ -32,7 +32,7 @@ For the normal Streamlit development server:
 ## Test license keys
 
 ```text
-LOGOS-BETA-2026
+FLATOOL-BETA-2026
 CCC-FOUNDER-2026
 ```
 
@@ -41,5 +41,5 @@ The license gate is intentionally lightweight because this version is fully clie
 ## Core files
 
 - `index.html` loads stlite from CDN and mounts the Streamlit app.
-- `app.py` contains the Logos UI and PPTX generation logic.
-- `logos_core.py` contains the reusable PDF/image-to-PPTX logic.
+- `app.py` contains the Flatool UI and PPTX generation logic.
+- `flatool_core.py` contains the reusable PDF/image-to-PPTX logic.

@@ -12,7 +12,7 @@ from pptx.util import Inches
 
 
 VALID_LICENSE_HASHES = {
-    hashlib.sha256("LOGOS-BETA-2026".encode()).hexdigest(),
+    hashlib.sha256("FLATOOL-BETA-2026".encode()).hexdigest(),
     hashlib.sha256("CCC-FOUNDER-2026".encode()).hexdigest(),
 }
 
@@ -35,7 +35,7 @@ def build_output_name(uploaded_files) -> str:
 
 
 def build_result_name(file_name: str, extension: str) -> str:
-    base_name = file_name.rsplit(".", 1)[0].strip() or "Logos"
+    base_name = file_name.rsplit(".", 1)[0].strip() or "Flatool"
     return f"{base_name} RESULT{extension}"
 
 
