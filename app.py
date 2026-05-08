@@ -72,6 +72,15 @@ st.markdown(
         border: 0;
       }
 
+      [data-testid="InputInstructions"] {
+        display: none;
+      }
+
+      [data-testid="stForm"] {
+        border: 0;
+        padding: 0;
+      }
+
       .flatool-footer {
         display: flex;
         justify-content: space-between;
@@ -88,12 +97,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-license_key = st.text_input("License Key", type="password", placeholder="Enter your Flatool key")
+with st.form("license_form", border=False):
+    key_col, submit_col = st.columns([3, 1])
+    with key_col:
+        license_key = st.text_input("License Key", placeholder="Enter your Flatool key")
+    with submit_col:
+        st.markdown("<div style='height: 1.75rem'></div>", unsafe_allow_html=True)
+        apply_key = st.form_submit_button("Apply Key", type="primary", use_container_width=True)
+
 license_ok = is_valid_license(license_key)
 
-if license_key and license_ok:
+if apply_key and license_ok:
     st.success("License accepted.")
-elif license_key:
+elif apply_key and license_key:
     st.error("License key not recognized.")
 
 mode = st.radio(

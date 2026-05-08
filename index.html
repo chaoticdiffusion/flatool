@@ -34,8 +34,15 @@
         transition: opacity 240ms ease;
       }
 
-      .boot-mark {
+      .boot-logo {
+        display: block;
+        height: auto;
+        max-width: min(52vw, 18rem);
+      }
+
+      .boot-fallback {
         color: #ffffff;
+        display: none;
         font-family: Arial, Helvetica, sans-serif;
         font-size: clamp(2rem, 5vw, 3.6rem);
         font-weight: 900;
@@ -43,22 +50,12 @@
         line-height: 1;
         text-transform: uppercase;
       }
-
-      .boot-submark {
-        color: #b9b4aa;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 0.82rem;
-        font-weight: 700;
-        margin-top: 0.9rem;
-      }
     </style>
   </head>
   <body>
     <div id="flatool-boot-cover">
-      <div>
-        <div class="boot-mark">Flatool</div>
-        <div class="boot-submark">Curious Curriculum Club</div>
-      </div>
+      <img class="boot-logo" src="./logo.png" alt="Flatool" onerror="this.style.display='none';document.querySelector('.boot-fallback').style.display='block';" />
+      <div class="boot-fallback">Flatool</div>
     </div>
     <div id="root"></div>
     <script type="module">
@@ -95,7 +92,7 @@
 
       const observer = new MutationObserver(() => {
         if (appIsReady()) {
-          setTimeout(revealApp, 700);
+          setTimeout(revealApp, 6000);
           observer.disconnect();
         }
       });
@@ -105,7 +102,7 @@
         subtree: true,
       });
 
-      setTimeout(revealApp, 20000);
+      setTimeout(revealApp, 90000);
     </script>
   </body>
 </html>

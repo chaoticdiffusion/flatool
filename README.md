@@ -43,3 +43,4 @@ The license gate is intentionally lightweight because this version is fully clie
 - `index.html` loads stlite from CDN and mounts the Streamlit app.
 - `app.py` contains the Flatool UI and PPTX generation logic.
 - `flatool_core.py` contains the reusable PDF/image-to-PPTX logic.
+- `logo.png` is used as the startup loading mark when present.
