@@ -1,6 +1,12 @@
 import streamlit as st
 
-from flatool_core import build_locked_pptx, build_output_name, build_pdf_batch_zip, is_valid_license
+from flatool_core import (
+    build_folder_output_name,
+    build_locked_pptx,
+    build_output_name,
+    build_pdf_batch_zip,
+    is_valid_license,
+)
 
 
 APP_NAME = "Flatool"
@@ -177,16 +183,22 @@ mode = st.radio(
 is_pdf_batch = mode == "Batch PDF to multiple PPTX"
 allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg", "pdf"]
 upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG/PDF files"
+upload_source = "Files"
 
 if license_ok and not is_pdf_batch:
     st.caption("This mode combines every uploaded image or PDF page into one PPTX file.")
+    upload_source = st.radio("Upload source", ["Files", "Folder"], horizontal=True)
 elif license_ok:
     st.caption("This mode creates one PPTX for each uploaded PDF, then downloads them together as a ZIP.")
+
+accept_multiple_files = "directory" if upload_source == "Folder" else True
+if upload_source == "Folder":
+    upload_label = "Select a folder"
 
 uploaded_files = st.file_uploader(
     upload_label,
     type=allowed_types,
-    accept_multiple_files=True,
+    accept_multiple_files=accept_multiple_files,
     disabled=not license_ok,
 )
 
@@ -194,7 +206,12 @@ if not license_ok:
     st.info("Enter a valid license key to unlock processing.")
 
 if license_ok and uploaded_files:
-    output_name = "Flatool PDF Batch RESULT.zip" if is_pdf_batch else build_output_name(uploaded_files)
+    if is_pdf_batch:
+        output_name = "Flatool PDF Batch RESULT.zip"
+    elif upload_source == "Folder":
+        output_name = build_folder_output_name(uploaded_files)
+    else:
+        output_name = build_output_name(uploaded_files)
     st.caption(f"Output: {output_name}")
 
     if st.button("Process files", type="primary"):
@@ -227,7 +244,8 @@ st.markdown(
       <ol class="flatool-steps">
         <li>Enter your Flatool license key, then click <strong>Apply Key</strong>.</li>
         <li>Choose a mode: combine PNG/JPG/PDF files into one PPTX, or process PDFs in batch.</li>
-        <li>Upload your files. Flatool sorts filenames naturally, so 2 comes before 10.</li>
+        <li>For one PPTX output, upload files or select a folder. Folder output uses the folder name.</li>
+        <li>Flatool sorts filenames naturally, so 2 comes before 10.</li>
         <li>Click <strong>Process files</strong>, then download the result.</li>
       </ol>
     </div>
@@ -248,6 +266,12 @@ with st.expander("Which mode should I use?"):
         "Use Multi PNG/JPG/PDF to one PPTX when you want everything combined into one "
         "PowerPoint file. Use Batch PDF to multiple PPTX when each PDF should become "
         "its own PowerPoint file."
+    )
+
+with st.expander("Can I upload a folder?"):
+    st.write(
+        "Yes. In the one-file mode, choose Folder as the upload source. Flatool combines "
+        "the supported files in that folder into one PPTX and names the result after the folder."
     )
 
 with st.expander("Why does the first load take a while?"):

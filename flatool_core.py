@@ -34,6 +34,45 @@ def build_output_name(uploaded_files) -> str:
     return build_result_name(first_file.name, ".pptx")
 
 
+def build_folder_output_name(uploaded_files) -> str:
+    folder_name = get_common_folder_name(file.name for file in uploaded_files)
+    if folder_name:
+        return f"{folder_name} RESULT.pptx"
+    return build_output_name(uploaded_files)
+
+
+def get_common_folder_name(file_names) -> str:
+    path_parts = [
+        normalize_path_parts(file_name)
+        for file_name in file_names
+        if "/" in file_name or "\\" in file_name
+    ]
+
+    if not path_parts:
+        return ""
+
+    common_parts = path_parts[0][:-1]
+    for parts in path_parts[1:]:
+        common_parts = common_path_prefix(common_parts, parts[:-1])
+
+    if common_parts:
+        return common_parts[-1]
+    return path_parts[0][0] if path_parts[0] else ""
+
+
+def normalize_path_parts(file_name: str) -> list[str]:
+    return [part for part in file_name.replace("\\", "/").split("/") if part]
+
+
+def common_path_prefix(first: list[str], second: list[str]) -> list[str]:
+    prefix = []
+    for left, right in zip(first, second):
+        if left != right:
+            break
+        prefix.append(left)
+    return prefix
+
+
 def build_result_name(file_name: str, extension: str) -> str:
     base_name = file_name.rsplit(".", 1)[0].strip() or "Flatool"
     return f"{base_name} RESULT{extension}"
