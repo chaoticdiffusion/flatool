@@ -107,6 +107,14 @@ st.markdown(
         padding: 0;
       }
 
+      [role="radiogroup"] input[type="radio"] {
+        accent-color: #4f9cff;
+      }
+
+      [role="radiogroup"] label:has(input[type="radio"]:checked) div:first-child {
+        border-color: #4f9cff;
+      }
+
       .flatool-section {
         border-top: 1px solid rgba(255, 255, 255, 0.18);
         margin-top: 3rem;
