@@ -90,7 +90,15 @@ def folder_batch_has_structure(uploaded_files) -> bool:
     if any(file.name.lower().endswith(".zip") for file in uploaded_files):
         return len(get_folder_batch_group_names(uploaded_files)) > 0
 
-    return len(get_folder_batch_group_names(uploaded_files)) > 1
+    group_names = get_folder_batch_group_names(uploaded_files)
+    if not group_names or not uploaded_files_have_path_info(uploaded_files):
+        return False
+
+    return not any(is_supported_material(group_name) for group_name in group_names)
+
+
+def uploaded_files_have_path_info(uploaded_files) -> bool:
+    return any("/" in file.name or "\\" in file.name for file in uploaded_files)
 
 
 def build_folder_batch_zip(uploaded_files) -> io.BytesIO:

@@ -6,7 +6,6 @@ import streamlit.components.v1 as components
 
 from flatool_core import (
     build_folder_batch_pptx_outputs,
-    build_folder_batch_output_name,
     build_folder_output_name,
     build_locked_pptx,
     build_named_output_name,
@@ -78,8 +77,8 @@ st.markdown(
 
       .stButton > button,
       .stDownloadButton > button {
-        background: #f5efe5;
-        color: #111111;
+        background: #f5efe5 !important;
+        color: #111111 !important;
         border: 0;
         border-radius: 2px;
         font-weight: 800;
@@ -88,7 +87,9 @@ st.markdown(
       }
 
       .stButton > button p,
-      .stDownloadButton > button p {
+      .stButton > button *,
+      .stDownloadButton > button p,
+      .stDownloadButton > button * {
         color: #111111 !important;
       }
 
@@ -99,26 +100,16 @@ st.markdown(
         border: 0;
       }
 
-      [data-testid="stFormSubmitButton"] button {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        color: #ffffff;
+      .stButton > button:disabled,
+      .stDownloadButton > button:disabled {
+        background: #3b362f !important;
+        color: #bdb4aa !important;
+        opacity: 1 !important;
       }
 
-      [data-testid="stFormSubmitButton"] button:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.42);
-        color: #ffffff;
-      }
-
-      [data-testid="stFormSubmitButton"] button p {
-        font-size: 0;
-      }
-
-      [data-testid="stFormSubmitButton"] button p::after {
-        content: "\\1F511";
-        font-size: 1.2rem;
-        line-height: 1;
+      .stButton > button:disabled *,
+      .stDownloadButton > button:disabled * {
+        color: #bdb4aa !important;
       }
 
       [data-testid="InputInstructions"] {
@@ -238,17 +229,16 @@ if "license_unlocked" not in st.session_state:
 if "folder_batch_outputs" not in st.session_state:
     st.session_state.folder_batch_outputs = []
 
-with st.form("license_form", border=False):
-    key_col, submit_col = st.columns([3, 1])
-    with key_col:
-        license_key = st.text_input(
-            "License Key",
-            value="CCC-FOUNDER-2026",
-            placeholder="Enter your Flatool key",
-            label_visibility="collapsed",
-        )
-    with submit_col:
-        apply_key = st.form_submit_button("Key", type="primary", use_container_width=True)
+key_col, submit_col = st.columns([3, 1])
+with key_col:
+    license_key = st.text_input(
+        "License Key",
+        value="CCC-FOUNDER-2026",
+        placeholder="Enter your Flatool key",
+        label_visibility="collapsed",
+    )
+with submit_col:
+    apply_key = st.button("Apply key", type="primary", use_container_width=True)
 
 if apply_key:
     st.session_state.license_unlocked = is_valid_license(license_key)
@@ -274,15 +264,15 @@ is_pdf_batch = mode == "Batch PDF to multiple PPTX"
 is_folder_batch = mode == "Parent folder to multiple PPTX"
 allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg", "pdf"]
 if is_folder_batch:
-    allowed_types = ["png", "jpg", "jpeg", "pdf", "zip"]
+    allowed_types = ["png", "jpg", "jpeg", "pdf"]
 upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG/PDF files"
 upload_source = "Files"
 
 if license_ok and not is_pdf_batch:
     if is_folder_batch:
         st.caption(
-            "This mode turns each subfolder into its own PPTX, then downloads a ZIP. "
-            "If folder upload groups everything together, upload a ZIP of the parent folder instead."
+            "This mode turns each detected subfolder into its own PPTX. "
+            "Choose the parent folder that contains your subfolders."
         )
         upload_source = "Folder"
     else:
@@ -293,7 +283,7 @@ elif license_ok:
 
 accept_multiple_files = "directory" if upload_source == "Folder" else True
 if upload_source == "Folder":
-    upload_label = "Select a parent folder or upload a parent ZIP"
+    upload_label = "Select a parent folder" if is_folder_batch else "Select a folder"
 
 uploaded_files = st.file_uploader(
     upload_label,
@@ -315,9 +305,7 @@ if license_ok and uploaded_files:
             placeholder="Type folder name if your browser does not detect it",
         )
 
-    if is_folder_batch:
-        output_name = build_folder_batch_output_name(uploaded_files)
-    elif is_pdf_batch:
+    if is_pdf_batch:
         output_name = "Flatool PDF Batch RESULT.zip"
     elif upload_source == "Folder":
         if output_name_override.strip():
@@ -326,7 +314,11 @@ if license_ok and uploaded_files:
             output_name = build_folder_output_name(uploaded_files)
     else:
         output_name = build_output_name(uploaded_files)
-    st.caption(f"Output: {output_name}")
+
+    if is_folder_batch:
+        st.caption("Output: one PPTX per detected subfolder.")
+    else:
+        st.caption(f"Output: {output_name}")
     folder_batch_ready = True
 
     if is_folder_batch:
@@ -336,8 +328,8 @@ if license_ok and uploaded_files:
         folder_batch_ready = folder_batch_has_structure(uploaded_files)
         if not folder_batch_ready:
             st.error(
-                "Folder structure was not detected. Upload a ZIP of the parent folder "
-                "so Flatool can see each subfolder."
+                "Folder structure was not detected. Choose the parent folder directly, "
+                "so Flatool can see each subfolder name."
             )
 
     if st.button("Process files", type="primary"):
@@ -387,7 +379,7 @@ st.markdown(
     <div class="flatool-section">
       <h2>How to use</h2>
       <ol class="flatool-steps">
-        <li>Enter your Flatool license key, then click <strong>Apply Key</strong>.</li>
+        <li>Enter your Flatool license key, then click the key button.</li>
         <li>Choose a mode: combine files into one PPTX, process PDFs in batch, or process subfolders in batch.</li>
         <li>For one PPTX output, upload files or select a folder. Folder output uses the folder name.</li>
         <li>Flatool sorts filenames naturally, so 2 comes before 10.</li>
@@ -418,8 +410,7 @@ with st.expander("Can I upload a folder?"):
     st.write(
         "Yes. In the one-file mode, choose Folder as the upload source. Flatool combines "
         "the supported files in that folder into one PPTX and names the result after the folder. "
-        "In Parent folder mode, each subfolder becomes a separate PPTX inside one ZIP. "
-        "If your browser does not preserve subfolder names, upload a ZIP of the parent folder."
+        "In Parent folder mode, each detected subfolder becomes a separate PPTX."
     )
 
 with st.expander("Why does the first load take a while?"):
