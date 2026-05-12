@@ -77,8 +77,13 @@ def build_folder_batch_output_name(uploaded_files) -> str:
 
 
 def get_folder_batch_group_names(uploaded_files) -> list[str]:
-    groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
-    return sorted(groups, key=natural_sort_key)
+    names = []
+    for uploaded_file in uploaded_files:
+        if uploaded_file.name.lower().endswith(".zip"):
+            names.extend(get_supported_zip_names(uploaded_file))
+        else:
+            names.append(uploaded_file.name)
+    return sorted(group_names_from_paths(names), key=natural_sort_key)
 
 
 def folder_batch_has_structure(uploaded_files) -> bool:
@@ -89,8 +94,11 @@ def folder_batch_has_structure(uploaded_files) -> bool:
 
 
 def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
+    if any(file.name.lower().endswith(".zip") for file in uploaded_files):
+        return build_zipped_parent_folder_batch(uploaded_files)
+
     output = io.BytesIO()
-    groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
+    groups = group_files_by_child_folder(uploaded_files)
 
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         for group_name in sorted(groups, key=natural_sort_key):
@@ -101,20 +109,65 @@ def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
     return output
 
 
-def expand_zip_uploads(uploaded_files) -> list:
-    expanded_files = []
+def build_zipped_parent_folder_batch(uploaded_files) -> io.BytesIO:
+    output = io.BytesIO()
 
-    for uploaded_file in uploaded_files:
-        if uploaded_file.name.lower().endswith(".zip"):
-            with zipfile.ZipFile(io.BytesIO(uploaded_file.getvalue())) as archive:
-                for item in archive.infolist():
-                    if item.is_dir() or not is_supported_material(item.filename):
-                        continue
-                    expanded_files.append(MemoryUpload(item.filename, archive.read(item)))
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as result_archive:
+        for uploaded_file in uploaded_files:
+            if uploaded_file.name.lower().endswith(".zip"):
+                with zipfile.ZipFile(io.BytesIO(uploaded_file.getvalue())) as source_archive:
+                    grouped_names = group_zip_names_by_child_folder(source_archive)
+                    for group_name in sorted(grouped_names, key=natural_sort_key):
+                        group_uploads = [
+                            MemoryUpload(item_name, source_archive.read(item_name))
+                            for item_name in sorted(grouped_names[group_name], key=natural_sort_key)
+                        ]
+                        pptx_bytes = build_locked_pptx(group_uploads)
+                        result_archive.writestr(f"{group_name} RESULT.pptx", pptx_bytes.getvalue())
+            else:
+                pptx_bytes = build_locked_pptx([uploaded_file])
+                result_archive.writestr(build_result_name(uploaded_file.name, ".pptx"), pptx_bytes.getvalue())
+
+    output.seek(0)
+    return output
+
+
+def get_supported_zip_names(uploaded_file) -> list[str]:
+    with zipfile.ZipFile(io.BytesIO(uploaded_file.getvalue())) as archive:
+        return [
+            item.filename
+            for item in archive.infolist()
+            if not item.is_dir() and is_supported_material(item.filename)
+        ]
+
+
+def group_zip_names_by_child_folder(archive: zipfile.ZipFile) -> dict[str, list[str]]:
+    supported_names = [
+        item.filename
+        for item in archive.infolist()
+        if not item.is_dir() and is_supported_material(item.filename)
+    ]
+    groups: dict[str, list[str]] = {name: [] for name in group_names_from_paths(supported_names)}
+    common_parent = common_parent_parts([normalize_path_parts(name) for name in supported_names])
+
+    for item_name in supported_names:
+        parts = normalize_path_parts(item_name)
+        relative_parts = parts[len(common_parent) :]
+        if len(relative_parts) > 1:
+            group_name = relative_parts[0]
+        elif common_parent:
+            group_name = common_parent[-1]
         else:
-            expanded_files.append(uploaded_file)
+            group_name = "Flatool"
+        groups.setdefault(group_name, []).append(item_name)
 
-    return expanded_files
+    return groups
+
+
+def group_names_from_paths(file_names: list[str]) -> list[str]:
+    file_paths = [normalize_path_parts(file_name) for file_name in file_names]
+    groups = group_paths_by_child_folder(file_paths)
+    return list(groups)
 
 
 def is_supported_material(file_name: str) -> bool:
@@ -123,10 +176,21 @@ def is_supported_material(file_name: str) -> bool:
 
 def group_files_by_child_folder(uploaded_files) -> dict[str, list]:
     file_paths = [normalize_path_parts(file.name) for file in uploaded_files]
-    common_parent = common_parent_parts(file_paths)
-    groups: dict[str, list] = {}
+    path_groups = group_paths_by_child_folder(file_paths)
+    groups: dict[str, list] = {name: [] for name in path_groups}
 
     for uploaded_file, parts in zip(uploaded_files, file_paths):
+        group_name = get_group_name_for_parts(parts, file_paths)
+        groups.setdefault(group_name, []).append(uploaded_file)
+
+    return groups
+
+
+def group_paths_by_child_folder(file_paths: list[list[str]]) -> dict[str, list[list[str]]]:
+    common_parent = common_parent_parts(file_paths)
+    groups: dict[str, list[list[str]]] = {}
+
+    for parts in file_paths:
         relative_parts = parts[len(common_parent) :]
         if len(relative_parts) > 1:
             group_name = relative_parts[0]
@@ -134,9 +198,19 @@ def group_files_by_child_folder(uploaded_files) -> dict[str, list]:
             group_name = common_parent[-1]
         else:
             group_name = "Flatool"
-        groups.setdefault(group_name, []).append(uploaded_file)
+        groups.setdefault(group_name, []).append(parts)
 
     return groups
+
+
+def get_group_name_for_parts(parts: list[str], all_file_paths: list[list[str]]) -> str:
+    common_parent = common_parent_parts(all_file_paths)
+    relative_parts = parts[len(common_parent) :]
+    if len(relative_parts) > 1:
+        return relative_parts[0]
+    if common_parent:
+        return common_parent[-1]
+    return "Flatool"
 
 
 def common_parent_parts(file_paths: list[list[str]]) -> list[str]:

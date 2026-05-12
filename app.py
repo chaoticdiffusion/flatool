@@ -30,6 +30,14 @@ st.markdown(
         --primary-color: #4f9cff;
       }
 
+      [data-testid="stWidgetLabel"],
+      [data-testid="stCaptionContainer"],
+      [data-testid="stMarkdownContainer"],
+      [data-testid="stMarkdownContainer"] p,
+      [data-testid="stMarkdownContainer"] li {
+        color: #f7f2e8;
+      }
+
       .block-container {
         max-width: 720px;
         padding-top: 3.5rem;
