@@ -98,13 +98,32 @@ def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
         return build_zipped_parent_folder_batch(uploaded_files)
 
     output = io.BytesIO()
-    groups = group_files_by_child_folder(uploaded_files)
+    outputs = build_folder_batch_pptx_outputs(uploaded_files)
 
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
-        for group_name in sorted(groups, key=natural_sort_key):
-            pptx_bytes = build_locked_pptx(groups[group_name])
-            archive.writestr(f"{group_name} RESULT.pptx", pptx_bytes.getvalue())
+        for file_name, pptx_bytes in outputs:
+            archive.writestr(file_name, pptx_bytes)
 
+    output.seek(0)
+    return output
+
+
+def build_folder_batch_pptx_outputs(uploaded_files) -> list[tuple[str, bytes]]:
+    groups = group_files_by_child_folder(uploaded_files)
+    outputs = []
+
+    for group_name in sorted(groups, key=natural_sort_key):
+        pptx_bytes = build_locked_pptx(groups[group_name])
+        outputs.append((f"{group_name} RESULT.pptx", pptx_bytes.getvalue()))
+
+    return outputs
+
+
+def package_outputs_zip(outputs: list[tuple[str, bytes]]) -> io.BytesIO:
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+        for file_name, file_bytes in outputs:
+            archive.writestr(file_name, file_bytes)
     output.seek(0)
     return output
 

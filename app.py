@@ -1,7 +1,11 @@
+import base64
+import json
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 from flatool_core import (
-    build_folder_batch_zip,
+    build_folder_batch_pptx_outputs,
     build_folder_batch_output_name,
     build_folder_output_name,
     build_locked_pptx,
@@ -81,6 +85,11 @@ st.markdown(
         font-weight: 800;
         min-height: 3.2rem;
         text-transform: uppercase;
+      }
+
+      .stButton > button p,
+      .stDownloadButton > button p {
+        color: #111111 !important;
       }
 
       .stButton > button:hover,
@@ -171,8 +180,63 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+def render_download_all_button(outputs):
+    files = [
+        {
+            "name": file_name,
+            "data": base64.b64encode(file_bytes).decode("ascii"),
+            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        }
+        for file_name, file_bytes in outputs
+    ]
+    payload = json.dumps(files)
+    components.html(
+        f"""
+        <button id="download-all-flatool" style="
+          width: 100%;
+          min-height: 3.2rem;
+          border: 0;
+          border-radius: 2px;
+          background: #f5efe5;
+          color: #111111;
+          font-weight: 800;
+          text-transform: uppercase;
+          cursor: pointer;
+        ">Download all</button>
+        <script>
+          const files = {payload};
+          const button = document.getElementById("download-all-flatool");
+          function base64ToBlob(base64, mime) {{
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i += 1) {{
+              bytes[i] = binary.charCodeAt(i);
+            }}
+            return new Blob([bytes], {{ type: mime }});
+          }}
+          button.addEventListener("click", () => {{
+            files.forEach((file, index) => {{
+              setTimeout(() => {{
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(base64ToBlob(file.data, file.mime));
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                link.remove();
+              }}, index * 450);
+            }});
+          }});
+        </script>
+        """,
+        height=64,
+    )
+
 if "license_unlocked" not in st.session_state:
     st.session_state.license_unlocked = False
+if "folder_batch_outputs" not in st.session_state:
+    st.session_state.folder_batch_outputs = []
 
 with st.form("license_form", border=False):
     key_col, submit_col = st.columns([3, 1])
@@ -282,9 +346,8 @@ if license_ok and uploaded_files:
                 if not folder_batch_ready:
                     st.stop()
                 with st.spinner("Building one PowerPoint per subfolder..."):
-                    result_bytes = build_folder_batch_zip(uploaded_files)
-                download_label = "Download ZIP"
-                mime_type = "application/zip"
+                    st.session_state.folder_batch_outputs = build_folder_batch_pptx_outputs(uploaded_files)
+                st.success("Done. Download each PowerPoint below, or use Download all.")
             elif is_pdf_batch:
                 with st.spinner("Building one PowerPoint per PDF..."):
                     result_bytes = build_pdf_batch_zip(uploaded_files)
@@ -296,15 +359,28 @@ if license_ok and uploaded_files:
                 download_label = "Download PPTX"
                 mime_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
-            st.success("Done. Your file is ready.")
-            st.download_button(
-                download_label,
-                data=result_bytes,
-                file_name=output_name,
-                mime=mime_type,
-            )
+            if not is_folder_batch:
+                st.success("Done. Your file is ready.")
+                st.download_button(
+                    download_label,
+                    data=result_bytes,
+                    file_name=output_name,
+                    mime=mime_type,
+                )
         except Exception as error:
             st.error(f"Processing failed: {error}")
+
+    if is_folder_batch and st.session_state.folder_batch_outputs:
+        st.markdown("### Downloads")
+        for file_name, file_bytes in st.session_state.folder_batch_outputs:
+            st.download_button(
+                f"Download {file_name}",
+                data=file_bytes,
+                file_name=file_name,
+                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            )
+
+        render_download_all_button(st.session_state.folder_batch_outputs)
 
 st.markdown(
     """
