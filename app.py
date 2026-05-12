@@ -162,6 +162,7 @@ with st.form("license_form", border=False):
     with key_col:
         license_key = st.text_input(
             "License Key",
+            value="CCC-FOUNDER-2026",
             placeholder="Enter your Flatool key",
             label_visibility="collapsed",
         )
