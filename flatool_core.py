@@ -2,6 +2,7 @@ import hashlib
 import io
 import re
 import zipfile
+from dataclasses import dataclass
 from typing import Iterable
 
 import fitz
@@ -15,6 +16,15 @@ VALID_LICENSE_HASHES = {
     hashlib.sha256("FLATOOL-BETA-2026".encode()).hexdigest(),
     hashlib.sha256("CCC-FOUNDER-2026".encode()).hexdigest(),
 }
+
+
+@dataclass
+class MemoryUpload:
+    name: str
+    data: bytes
+
+    def getvalue(self) -> bytes:
+        return self.data
 
 
 def natural_sort_key(value: str) -> list[object]:
@@ -43,7 +53,7 @@ def build_folder_output_name(uploaded_files) -> str:
 
 def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
     output = io.BytesIO()
-    groups = group_files_by_child_folder(uploaded_files)
+    groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
 
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         for group_name in sorted(groups, key=natural_sort_key):
@@ -52,6 +62,26 @@ def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
 
     output.seek(0)
     return output
+
+
+def expand_zip_uploads(uploaded_files) -> list:
+    expanded_files = []
+
+    for uploaded_file in uploaded_files:
+        if uploaded_file.name.lower().endswith(".zip"):
+            with zipfile.ZipFile(io.BytesIO(uploaded_file.getvalue())) as archive:
+                for item in archive.infolist():
+                    if item.is_dir() or not is_supported_material(item.filename):
+                        continue
+                    expanded_files.append(MemoryUpload(item.filename, archive.read(item)))
+        else:
+            expanded_files.append(uploaded_file)
+
+    return expanded_files
+
+
+def is_supported_material(file_name: str) -> bool:
+    return file_name.lower().endswith((".png", ".jpg", ".jpeg", ".pdf"))
 
 
 def group_files_by_child_folder(uploaded_files) -> dict[str, list]:

@@ -111,8 +111,16 @@ st.markdown(
         accent-color: #4f9cff;
       }
 
-      [role="radiogroup"] label:has(input[type="radio"]:checked) div:first-child {
-        border-color: #4f9cff;
+      [role="radiogroup"] svg,
+      [data-testid="stRadio"] svg {
+        color: #4f9cff;
+        fill: #4f9cff;
+        stroke: #4f9cff;
+      }
+
+      [role="radiogroup"] [aria-checked="true"],
+      [data-testid="stRadio"] [aria-checked="true"] {
+        color: #4f9cff;
       }
 
       .flatool-section {
@@ -203,12 +211,17 @@ mode = st.radio(
 is_pdf_batch = mode == "Batch PDF to multiple PPTX"
 is_folder_batch = mode == "Parent folder to multiple PPTX"
 allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg", "pdf"]
+if is_folder_batch:
+    allowed_types = ["png", "jpg", "jpeg", "pdf", "zip"]
 upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG/PDF files"
 upload_source = "Files"
 
 if license_ok and not is_pdf_batch:
     if is_folder_batch:
-        st.caption("This mode turns each subfolder in a parent folder into its own PPTX, then downloads a ZIP.")
+        st.caption(
+            "This mode turns each subfolder into its own PPTX, then downloads a ZIP. "
+            "If folder upload groups everything together, upload a ZIP of the parent folder instead."
+        )
         upload_source = "Folder"
     else:
         st.caption("This mode combines every uploaded image or PDF page into one PPTX file.")
@@ -218,7 +231,7 @@ elif license_ok:
 
 accept_multiple_files = "directory" if upload_source == "Folder" else True
 if upload_source == "Folder":
-    upload_label = "Select a folder"
+    upload_label = "Select a parent folder or upload a parent ZIP"
 
 uploaded_files = st.file_uploader(
     upload_label,
@@ -305,7 +318,8 @@ with st.expander("Can I upload a folder?"):
     st.write(
         "Yes. In the one-file mode, choose Folder as the upload source. Flatool combines "
         "the supported files in that folder into one PPTX and names the result after the folder. "
-        "In Parent folder mode, each subfolder becomes a separate PPTX inside one ZIP."
+        "In Parent folder mode, each subfolder becomes a separate PPTX inside one ZIP. "
+        "If your browser does not preserve subfolder names, upload a ZIP of the parent folder."
     )
 
 with st.expander("Why does the first load take a while?"):
