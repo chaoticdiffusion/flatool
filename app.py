@@ -2,9 +2,12 @@ import streamlit as st
 
 from flatool_core import (
     build_folder_batch_zip,
+    build_folder_batch_output_name,
     build_folder_output_name,
     build_locked_pptx,
+    build_named_output_name,
     build_output_name,
+    get_detected_folder_name,
     build_pdf_batch_zip,
     is_valid_license,
 )
@@ -244,12 +247,24 @@ if not license_ok:
     st.info("Enter a valid license key to unlock processing.")
 
 if license_ok and uploaded_files:
+    output_name_override = ""
+    if upload_source == "Folder" and not is_folder_batch:
+        detected_folder_name = get_detected_folder_name(uploaded_files)
+        output_name_override = st.text_input(
+            "Output name",
+            value=detected_folder_name,
+            placeholder="Type folder name if your browser does not detect it",
+        )
+
     if is_folder_batch:
-        output_name = "Flatool Folder Batch RESULT.zip"
+        output_name = build_folder_batch_output_name(uploaded_files)
     elif is_pdf_batch:
         output_name = "Flatool PDF Batch RESULT.zip"
     elif upload_source == "Folder":
-        output_name = build_folder_output_name(uploaded_files)
+        if output_name_override.strip():
+            output_name = build_named_output_name(output_name_override, ".pptx")
+        else:
+            output_name = build_folder_output_name(uploaded_files)
     else:
         output_name = build_output_name(uploaded_files)
     st.caption(f"Output: {output_name}")

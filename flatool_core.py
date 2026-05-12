@@ -51,6 +51,31 @@ def build_folder_output_name(uploaded_files) -> str:
     return build_output_name(uploaded_files)
 
 
+def build_named_output_name(name: str, extension: str) -> str:
+    base_name = name.strip()
+    if not base_name:
+        base_name = "Flatool"
+    if base_name.lower().endswith(extension.lower()):
+        return base_name
+    if base_name.upper().endswith(" RESULT"):
+        return f"{base_name}{extension}"
+    return f"{base_name} RESULT{extension}"
+
+
+def get_detected_folder_name(uploaded_files) -> str:
+    return get_common_folder_name(file.name for file in uploaded_files)
+
+
+def build_folder_batch_output_name(uploaded_files) -> str:
+    if len(uploaded_files) == 1 and uploaded_files[0].name.lower().endswith(".zip"):
+        return build_result_name(uploaded_files[0].name, ".zip")
+
+    folder_name = get_detected_folder_name(uploaded_files)
+    if folder_name:
+        return f"{folder_name} RESULT.zip"
+    return "Flatool Folder Batch RESULT.zip"
+
+
 def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
     output = io.BytesIO()
     groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
