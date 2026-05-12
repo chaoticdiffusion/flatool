@@ -7,7 +7,9 @@ from flatool_core import (
     build_locked_pptx,
     build_named_output_name,
     build_output_name,
+    folder_batch_has_structure,
     get_detected_folder_name,
+    get_folder_batch_group_names,
     build_pdf_batch_zip,
     is_valid_license,
 )
@@ -25,6 +27,7 @@ st.markdown(
       .stApp {
         background: #111111;
         color: #f7f2e8;
+        --primary-color: #4f9cff;
       }
 
       .block-container {
@@ -111,19 +114,25 @@ st.markdown(
       }
 
       [role="radiogroup"] input[type="radio"] {
-        accent-color: #4f9cff;
+        accent-color: #4f9cff !important;
       }
 
-      [role="radiogroup"] svg,
-      [data-testid="stRadio"] svg {
-        color: #4f9cff;
-        fill: #4f9cff;
-        stroke: #4f9cff;
+      [data-testid="stRadio"] label[data-baseweb="radio"] div:first-child {
+        border-color: #4f9cff !important;
       }
 
-      [role="radiogroup"] [aria-checked="true"],
+      [data-testid="stRadio"] label[data-baseweb="radio"]:has(input:checked) div:first-child,
       [data-testid="stRadio"] [aria-checked="true"] {
-        color: #4f9cff;
+        background-color: #4f9cff !important;
+        border-color: #4f9cff !important;
+      }
+
+      [data-testid="stRadio"] svg,
+      [data-testid="stRadio"] circle,
+      [data-testid="stRadio"] path {
+        color: #4f9cff !important;
+        fill: #4f9cff !important;
+        stroke: #4f9cff !important;
       }
 
       .flatool-section {
@@ -268,10 +277,24 @@ if license_ok and uploaded_files:
     else:
         output_name = build_output_name(uploaded_files)
     st.caption(f"Output: {output_name}")
+    folder_batch_ready = True
+
+    if is_folder_batch:
+        group_names = get_folder_batch_group_names(uploaded_files)
+        if group_names:
+            st.caption(f"Detected groups: {', '.join(group_names)}")
+        folder_batch_ready = folder_batch_has_structure(uploaded_files)
+        if not folder_batch_ready:
+            st.error(
+                "Folder structure was not detected. Upload a ZIP of the parent folder "
+                "so Flatool can see each subfolder."
+            )
 
     if st.button("Process files", type="primary"):
         try:
             if is_folder_batch:
+                if not folder_batch_ready:
+                    st.stop()
                 with st.spinner("Building one PowerPoint per subfolder..."):
                     result_bytes = build_folder_batch_zip(uploaded_files)
                 download_label = "Download ZIP"

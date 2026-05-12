@@ -76,6 +76,18 @@ def build_folder_batch_output_name(uploaded_files) -> str:
     return "Flatool Folder Batch RESULT.zip"
 
 
+def get_folder_batch_group_names(uploaded_files) -> list[str]:
+    groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
+    return sorted(groups, key=natural_sort_key)
+
+
+def folder_batch_has_structure(uploaded_files) -> bool:
+    if any(file.name.lower().endswith(".zip") for file in uploaded_files):
+        return len(get_folder_batch_group_names(uploaded_files)) > 0
+
+    return len(get_folder_batch_group_names(uploaded_files)) > 1
+
+
 def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
     output = io.BytesIO()
     groups = group_files_by_child_folder(expand_zip_uploads(uploaded_files))
