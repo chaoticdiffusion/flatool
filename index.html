@@ -56,6 +56,7 @@
         align-items: center;
         background: transparent !important;
         border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        border-radius: 8px !important;
         color: transparent !important;
         display: inline-flex;
         font-size: 0 !important;
@@ -144,6 +145,24 @@
             button.classList.add("flatool-key-button");
             button.setAttribute("aria-label", "Apply key");
           }
+        });
+        document.querySelectorAll(".flatool-download-all-button").forEach((button) => {
+          if (button.dataset.flatoolWired === "true") {
+            return;
+          }
+          button.dataset.flatoolWired = "true";
+          button.addEventListener("click", () => {
+            const downloadButtons = Array.from(document.querySelectorAll("#root button")).filter(
+              (candidate) =>
+                candidate !== button &&
+                !candidate.classList.contains("flatool-download-all-button") &&
+                candidate.textContent.trim().toLowerCase().startsWith("download "),
+            );
+
+            downloadButtons.forEach((downloadButton, index) => {
+              setTimeout(() => downloadButton.click(), index * 700);
+            });
+          });
         });
       };
 

@@ -1,8 +1,4 @@
-import base64
-import json
-
 import streamlit as st
-import streamlit.components.v1 as components
 
 from flatool_core import (
     build_folder_batch_pptx_outputs,
@@ -31,6 +27,7 @@ st.markdown(
         background: #111111;
         color: #f7f2e8;
         --primary-color: #4f9cff;
+        --flatool-radius: 8px;
       }
 
       [data-testid="stWidgetLabel"],
@@ -80,7 +77,7 @@ st.markdown(
         background: #f5efe5 !important;
         color: #111111 !important;
         border: 0;
-        border-radius: 2px;
+        border-radius: var(--flatool-radius);
         font-weight: 800;
         min-height: 3.2rem;
         text-transform: uppercase;
@@ -121,6 +118,30 @@ st.markdown(
         padding: 0;
       }
 
+      [data-testid="stTextInput"] input,
+      [data-testid="stFileUploaderDropzone"],
+      [data-testid="stFileUploader"] section,
+      [data-testid="stFileUploaderFile"] {
+        border-radius: var(--flatool-radius) !important;
+      }
+
+      .flatool-download-all-button {
+        background: #f5efe5;
+        border: 0;
+        border-radius: var(--flatool-radius);
+        color: #111111;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        min-height: 3.2rem;
+        text-transform: uppercase;
+        width: 100%;
+      }
+
+      .flatool-download-all-button:hover {
+        background: #ffffff;
+      }
+
       .flatool-section {
         border-top: 1px solid rgba(255, 255, 255, 0.18);
         margin-top: 3rem;
@@ -146,7 +167,7 @@ st.markdown(
       [data-testid="stExpander"] {
         background: #181818;
         border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 2px;
+        border-radius: var(--flatool-radius);
       }
 
       .flatool-app-note {
@@ -173,61 +194,18 @@ st.markdown(
 
 
 def render_download_all_button(outputs):
-    files = [
-        {
-            "name": file_name,
-            "data": base64.b64encode(file_bytes).decode("ascii"),
-            "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        }
-        for file_name, file_bytes in outputs
-    ]
-    payload = json.dumps(files)
-    components.html(
-        f"""
-        <button id="download-all-flatool" style="
-          width: 100%;
-          min-height: 3.2rem;
-          border: 0;
-          border-radius: 2px;
-          background: #f5efe5;
-          color: #111111;
-          font-weight: 800;
-          text-transform: uppercase;
-          cursor: pointer;
-        ">Download all</button>
-        <script>
-          const files = {payload};
-          const button = document.getElementById("download-all-flatool");
-          function base64ToBlob(base64, mime) {{
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i += 1) {{
-              bytes[i] = binary.charCodeAt(i);
-            }}
-            return new Blob([bytes], {{ type: mime }});
-          }}
-          button.addEventListener("click", () => {{
-            files.forEach((file, index) => {{
-              setTimeout(() => {{
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(base64ToBlob(file.data, file.mime));
-                link.download = file.name;
-                document.body.appendChild(link);
-                link.click();
-                URL.revokeObjectURL(link.href);
-                link.remove();
-              }}, index * 450);
-            }});
-          }});
-        </script>
-        """,
-        height=64,
+    st.markdown(
+        f'<button type="button" class="flatool-download-all-button" '
+        f'data-flatool-download-count="{len(outputs)}">Download all</button>',
+        unsafe_allow_html=True,
     )
 
 if "license_unlocked" not in st.session_state:
     st.session_state.license_unlocked = False
 if "folder_batch_outputs" not in st.session_state:
     st.session_state.folder_batch_outputs = []
+if "uploader_nonce" not in st.session_state:
+    st.session_state.uploader_nonce = 0
 
 key_col, submit_col = st.columns([3, 1])
 with key_col:
@@ -290,12 +268,18 @@ uploaded_files = st.file_uploader(
     type=allowed_types,
     accept_multiple_files=accept_multiple_files,
     disabled=not license_ok,
+    key=f"flatool_uploader_{st.session_state.uploader_nonce}_{mode}_{upload_source}",
 )
 
 if not license_ok:
     st.info("Enter a valid license key to unlock processing.")
 
 if license_ok and uploaded_files:
+    if st.button("Clear items", type="secondary", use_container_width=True):
+        st.session_state.folder_batch_outputs = []
+        st.session_state.uploader_nonce += 1
+        st.rerun()
+
     output_name_override = ""
     if upload_source == "Folder" and not is_folder_batch:
         detected_folder_name = get_detected_folder_name(uploaded_files)
