@@ -29,6 +29,10 @@ st.markdown(
         --primary-color: #4f9cff;
         --flatool-radius: 8px;
         --flatool-control-height: 2.75rem;
+        --flatool-cream: #f2dfc9;
+        --flatool-deep: #0b2925;
+        --flatool-deep-hover: #103832;
+        --flatool-deep-border: #34544c;
       }
 
       [data-testid="stWidgetLabel"],
@@ -75,9 +79,9 @@ st.markdown(
 
       .stButton > button,
       .stDownloadButton > button {
-        background: #f5efe5 !important;
-        color: #111111 !important;
-        border: 0;
+        background: var(--flatool-deep) !important;
+        color: var(--flatool-cream) !important;
+        border: 1px solid var(--flatool-deep-border);
         border-radius: var(--flatool-radius);
         box-sizing: border-box;
         font-weight: 800;
@@ -89,26 +93,27 @@ st.markdown(
       .stButton > button *,
       .stDownloadButton > button p,
       .stDownloadButton > button * {
-        color: #111111 !important;
+        color: var(--flatool-cream) !important;
       }
 
       .stButton > button:hover,
       .stDownloadButton > button:hover {
-        background: #ffffff;
-        color: #111111;
-        border: 0;
+        background: var(--flatool-deep-hover) !important;
+        color: var(--flatool-cream) !important;
+        border: 1px solid var(--flatool-cream);
       }
 
       .stButton > button:disabled,
       .stDownloadButton > button:disabled {
-        background: #3b362f !important;
-        color: #bdb4aa !important;
+        background: #1d2926 !important;
+        color: rgba(242, 223, 201, 0.46) !important;
+        border: 1px solid rgba(242, 223, 201, 0.14);
         opacity: 1 !important;
       }
 
       .stButton > button:disabled *,
       .stDownloadButton > button:disabled * {
-        color: #bdb4aa !important;
+        color: rgba(242, 223, 201, 0.46) !important;
       }
 
       [data-testid="InputInstructions"] {
@@ -118,6 +123,11 @@ st.markdown(
       [data-testid="stForm"] {
         border: 0;
         padding: 0;
+      }
+
+      [data-testid="column"] [data-testid="stTextInput"],
+      [data-testid="column"] [data-testid="stButton"] {
+        margin: 0 !important;
       }
 
       [data-testid="stTextInput"] input,
@@ -134,10 +144,10 @@ st.markdown(
       }
 
       .flatool-download-all-button {
-        background: #f5efe5;
-        border: 0;
+        background: var(--flatool-deep);
+        border: 1px solid var(--flatool-deep-border);
         border-radius: var(--flatool-radius);
-        color: #111111;
+        color: var(--flatool-cream);
         cursor: pointer;
         font: inherit;
         font-weight: 800;
@@ -147,7 +157,8 @@ st.markdown(
       }
 
       .flatool-download-all-button:hover {
-        background: #ffffff;
+        background: var(--flatool-deep-hover);
+        border-color: var(--flatool-cream);
       }
 
       .flatool-section {
@@ -215,7 +226,7 @@ if "folder_batch_outputs" not in st.session_state:
 if "uploader_nonce" not in st.session_state:
     st.session_state.uploader_nonce = 0
 
-key_col, submit_col = st.columns([3, 1])
+key_col, submit_col = st.columns([3, 1], vertical_alignment="center")
 with key_col:
     license_key = st.text_input(
         "License Key",

@@ -47,7 +47,7 @@ def build_output_name(uploaded_files) -> str:
 def build_folder_output_name(uploaded_files) -> str:
     folder_name = get_common_folder_name(file.name for file in uploaded_files)
     if folder_name:
-        return f"{folder_name} RESULT.pptx"
+        return f"{folder_name}.pptx"
     return build_output_name(uploaded_files)
 
 
@@ -57,9 +57,7 @@ def build_named_output_name(name: str, extension: str) -> str:
         base_name = "Flatool"
     if base_name.lower().endswith(extension.lower()):
         return base_name
-    if base_name.upper().endswith(" RESULT"):
-        return f"{base_name}{extension}"
-    return f"{base_name} RESULT{extension}"
+    return f"{base_name}{extension}"
 
 
 def get_detected_folder_name(uploaded_files) -> str:
@@ -72,8 +70,8 @@ def build_folder_batch_output_name(uploaded_files) -> str:
 
     folder_name = get_detected_folder_name(uploaded_files)
     if folder_name:
-        return f"{folder_name} RESULT.zip"
-    return "Flatool Folder Batch RESULT.zip"
+        return f"{folder_name}.zip"
+    return "Flatool Folder Batch.zip"
 
 
 def get_folder_batch_group_names(uploaded_files) -> list[str]:
@@ -122,7 +120,7 @@ def build_folder_batch_pptx_outputs(uploaded_files) -> list[tuple[str, bytes]]:
 
     for group_name in sorted(groups, key=natural_sort_key):
         pptx_bytes = build_locked_pptx(groups[group_name])
-        outputs.append((f"{group_name} RESULT.pptx", pptx_bytes.getvalue()))
+        outputs.append((f"{group_name}.pptx", pptx_bytes.getvalue()))
 
     return outputs
 
@@ -150,7 +148,7 @@ def build_zipped_parent_folder_batch(uploaded_files) -> io.BytesIO:
                             for item_name in sorted(grouped_names[group_name], key=natural_sort_key)
                         ]
                         pptx_bytes = build_locked_pptx(group_uploads)
-                        result_archive.writestr(f"{group_name} RESULT.pptx", pptx_bytes.getvalue())
+                        result_archive.writestr(f"{group_name}.pptx", pptx_bytes.getvalue())
             else:
                 pptx_bytes = build_locked_pptx([uploaded_file])
                 result_archive.writestr(build_result_name(uploaded_file.name, ".pptx"), pptx_bytes.getvalue())
