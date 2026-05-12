@@ -57,11 +57,22 @@
         background: transparent !important;
         border: 1px solid rgba(255, 255, 255, 0.22) !important;
         border-radius: 8px !important;
+        box-sizing: border-box !important;
         color: transparent !important;
         display: inline-flex;
         font-size: 0 !important;
+        height: 2.75rem !important;
         justify-content: center;
+        min-height: 2.75rem !important;
+        padding: 0 !important;
         position: relative;
+      }
+
+      #root [data-testid="stTextInput"] input,
+      #root input[type="text"] {
+        box-sizing: border-box !important;
+        height: 2.75rem !important;
+        min-height: 2.75rem !important;
       }
 
       #root button.flatool-key-button * {

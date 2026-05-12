@@ -28,6 +28,7 @@ st.markdown(
         color: #f7f2e8;
         --primary-color: #4f9cff;
         --flatool-radius: 8px;
+        --flatool-control-height: 2.75rem;
       }
 
       [data-testid="stWidgetLabel"],
@@ -78,8 +79,9 @@ st.markdown(
         color: #111111 !important;
         border: 0;
         border-radius: var(--flatool-radius);
+        box-sizing: border-box;
         font-weight: 800;
-        min-height: 3.2rem;
+        min-height: var(--flatool-control-height);
         text-transform: uppercase;
       }
 
@@ -125,6 +127,12 @@ st.markdown(
         border-radius: var(--flatool-radius) !important;
       }
 
+      [data-testid="stTextInput"] input {
+        box-sizing: border-box !important;
+        min-height: var(--flatool-control-height) !important;
+        height: var(--flatool-control-height) !important;
+      }
+
       .flatool-download-all-button {
         background: #f5efe5;
         border: 0;
@@ -133,7 +141,7 @@ st.markdown(
         cursor: pointer;
         font: inherit;
         font-weight: 800;
-        min-height: 3.2rem;
+        min-height: var(--flatool-control-height);
         text-transform: uppercase;
         width: 100%;
       }
