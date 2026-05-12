@@ -113,28 +113,6 @@ st.markdown(
         padding: 0;
       }
 
-      [role="radiogroup"] input[type="radio"] {
-        accent-color: #4f9cff !important;
-      }
-
-      [data-testid="stRadio"] label[data-baseweb="radio"] div:first-child {
-        border-color: #4f9cff !important;
-      }
-
-      [data-testid="stRadio"] label[data-baseweb="radio"]:has(input:checked) div:first-child,
-      [data-testid="stRadio"] [aria-checked="true"] {
-        background-color: #4f9cff !important;
-        border-color: #4f9cff !important;
-      }
-
-      [data-testid="stRadio"] svg,
-      [data-testid="stRadio"] circle,
-      [data-testid="stRadio"] path {
-        color: #4f9cff !important;
-        fill: #4f9cff !important;
-        stroke: #4f9cff !important;
-      }
-
       .flatool-section {
         border-top: 1px solid rgba(255, 255, 255, 0.18);
         margin-top: 3rem;
