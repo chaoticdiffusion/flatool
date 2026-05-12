@@ -1,6 +1,7 @@
 import streamlit as st
 
 from flatool_core import (
+    build_folder_batch_zip,
     build_folder_output_name,
     build_locked_pptx,
     build_output_name,
@@ -176,18 +177,27 @@ elif apply_key and license_key:
 
 mode = st.radio(
     "Mode",
-    ["Multi PNG/JPG/PDF to one PPTX", "Batch PDF to multiple PPTX"],
+    [
+        "Multi PNG/JPG/PDF to one PPTX",
+        "Batch PDF to multiple PPTX",
+        "Parent folder to multiple PPTX",
+    ],
     disabled=not license_ok,
 )
 
 is_pdf_batch = mode == "Batch PDF to multiple PPTX"
+is_folder_batch = mode == "Parent folder to multiple PPTX"
 allowed_types = ["pdf"] if is_pdf_batch else ["png", "jpg", "jpeg", "pdf"]
 upload_label = "Select PDF files" if is_pdf_batch else "Select PNG/JPG/PDF files"
 upload_source = "Files"
 
 if license_ok and not is_pdf_batch:
-    st.caption("This mode combines every uploaded image or PDF page into one PPTX file.")
-    upload_source = st.radio("Upload source", ["Files", "Folder"], horizontal=True)
+    if is_folder_batch:
+        st.caption("This mode turns each subfolder in a parent folder into its own PPTX, then downloads a ZIP.")
+        upload_source = "Folder"
+    else:
+        st.caption("This mode combines every uploaded image or PDF page into one PPTX file.")
+        upload_source = st.radio("Upload source", ["Files", "Folder"], horizontal=True)
 elif license_ok:
     st.caption("This mode creates one PPTX for each uploaded PDF, then downloads them together as a ZIP.")
 
@@ -206,7 +216,9 @@ if not license_ok:
     st.info("Enter a valid license key to unlock processing.")
 
 if license_ok and uploaded_files:
-    if is_pdf_batch:
+    if is_folder_batch:
+        output_name = "Flatool Folder Batch RESULT.zip"
+    elif is_pdf_batch:
         output_name = "Flatool PDF Batch RESULT.zip"
     elif upload_source == "Folder":
         output_name = build_folder_output_name(uploaded_files)
@@ -216,7 +228,12 @@ if license_ok and uploaded_files:
 
     if st.button("Process files", type="primary"):
         try:
-            if is_pdf_batch:
+            if is_folder_batch:
+                with st.spinner("Building one PowerPoint per subfolder..."):
+                    result_bytes = build_folder_batch_zip(uploaded_files)
+                download_label = "Download ZIP"
+                mime_type = "application/zip"
+            elif is_pdf_batch:
                 with st.spinner("Building one PowerPoint per PDF..."):
                     result_bytes = build_pdf_batch_zip(uploaded_files)
                 download_label = "Download ZIP"
@@ -243,7 +260,7 @@ st.markdown(
       <h2>How to use</h2>
       <ol class="flatool-steps">
         <li>Enter your Flatool license key, then click <strong>Apply Key</strong>.</li>
-        <li>Choose a mode: combine PNG/JPG/PDF files into one PPTX, or process PDFs in batch.</li>
+        <li>Choose a mode: combine files into one PPTX, process PDFs in batch, or process subfolders in batch.</li>
         <li>For one PPTX output, upload files or select a folder. Folder output uses the folder name.</li>
         <li>Flatool sorts filenames naturally, so 2 comes before 10.</li>
         <li>Click <strong>Process files</strong>, then download the result.</li>
@@ -265,13 +282,15 @@ with st.expander("Which mode should I use?"):
     st.write(
         "Use Multi PNG/JPG/PDF to one PPTX when you want everything combined into one "
         "PowerPoint file. Use Batch PDF to multiple PPTX when each PDF should become "
-        "its own PowerPoint file."
+        "its own PowerPoint file. Use Parent folder to multiple PPTX when each subfolder "
+        "should become its own PowerPoint file."
     )
 
 with st.expander("Can I upload a folder?"):
     st.write(
         "Yes. In the one-file mode, choose Folder as the upload source. Flatool combines "
-        "the supported files in that folder into one PPTX and names the result after the folder."
+        "the supported files in that folder into one PPTX and names the result after the folder. "
+        "In Parent folder mode, each subfolder becomes a separate PPTX inside one ZIP."
     )
 
 with st.expander("Why does the first load take a while?"):

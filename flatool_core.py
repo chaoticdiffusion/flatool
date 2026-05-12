@@ -41,6 +41,47 @@ def build_folder_output_name(uploaded_files) -> str:
     return build_output_name(uploaded_files)
 
 
+def build_folder_batch_zip(uploaded_files) -> io.BytesIO:
+    output = io.BytesIO()
+    groups = group_files_by_child_folder(uploaded_files)
+
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+        for group_name in sorted(groups, key=natural_sort_key):
+            pptx_bytes = build_locked_pptx(groups[group_name])
+            archive.writestr(f"{group_name} RESULT.pptx", pptx_bytes.getvalue())
+
+    output.seek(0)
+    return output
+
+
+def group_files_by_child_folder(uploaded_files) -> dict[str, list]:
+    file_paths = [normalize_path_parts(file.name) for file in uploaded_files]
+    common_parent = common_parent_parts(file_paths)
+    groups: dict[str, list] = {}
+
+    for uploaded_file, parts in zip(uploaded_files, file_paths):
+        relative_parts = parts[len(common_parent) :]
+        if len(relative_parts) > 1:
+            group_name = relative_parts[0]
+        elif common_parent:
+            group_name = common_parent[-1]
+        else:
+            group_name = "Flatool"
+        groups.setdefault(group_name, []).append(uploaded_file)
+
+    return groups
+
+
+def common_parent_parts(file_paths: list[list[str]]) -> list[str]:
+    if not file_paths:
+        return []
+
+    common_parts = file_paths[0][:-1]
+    for parts in file_paths[1:]:
+        common_parts = common_path_prefix(common_parts, parts[:-1])
+    return common_parts
+
+
 def get_common_folder_name(file_names) -> str:
     path_parts = [
         normalize_path_parts(file_name)
