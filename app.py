@@ -157,6 +157,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if "license_unlocked" not in st.session_state:
+    st.session_state.license_unlocked = False
+
 with st.form("license_form", border=False):
     key_col, submit_col = st.columns([3, 1])
     with key_col:
@@ -169,7 +172,10 @@ with st.form("license_form", border=False):
     with submit_col:
         apply_key = st.form_submit_button("Key", type="primary", use_container_width=True)
 
-license_ok = is_valid_license(license_key)
+if apply_key:
+    st.session_state.license_unlocked = is_valid_license(license_key)
+
+license_ok = st.session_state.license_unlocked
 
 if apply_key and license_ok:
     st.success("License accepted.")
