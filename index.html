@@ -94,6 +94,17 @@
     <script type="module">
       import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.7.2/build/stlite.js";
 
+      const fileNameDescriptor = Object.getOwnPropertyDescriptor(File.prototype, "name");
+      if (fileNameDescriptor?.get && fileNameDescriptor.configurable) {
+        Object.defineProperty(File.prototype, "name", {
+          configurable: true,
+          enumerable: fileNameDescriptor.enumerable,
+          get() {
+            return this.webkitRelativePath || fileNameDescriptor.get.call(this);
+          },
+        });
+      }
+
       mount(
         {
           entrypoint: "app.py",
